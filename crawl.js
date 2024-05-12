@@ -1,3 +1,4 @@
+import consola from "consola";
 import { JSDOM } from "jsdom";
 
 export function normalizeURL(str) {
@@ -25,4 +26,25 @@ export function getURLsFromHTML(html, baseURL) {
     }
     return url;
   });
+}
+
+export async function crawlPage(baseUrl) {
+  try {
+    const response = await fetch(baseUrl);
+
+    if (response.status >= 400) {
+      consola.error(new Error(`status: ${response.status}`));
+      return;
+    }
+
+    const contentHeader = response.headers.get("Content-Type");
+    if (!contentHeader.startsWith("text/html")) {
+      consola.error(new Error(`invalid Content-Type: ${contentHeader}`));
+      return;
+    }
+    const html = await response.text();
+    console.log(html);
+  } catch (error) {
+    consola.error(new Error(error));
+  }
 }

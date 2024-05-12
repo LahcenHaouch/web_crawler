@@ -1,4 +1,5 @@
 import { consola } from "consola";
+import { crawlPage } from "./crawl.js";
 
 function main() {
   consola.box("web_crawler");
@@ -12,6 +13,7 @@ function main() {
 
   const [baseUrl] = args;
   consola.start(`crawling ${baseUrl}`);
+  crawlPage(baseUrl);
 }
 
 main();
