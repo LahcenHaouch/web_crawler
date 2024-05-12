@@ -1,3 +1,17 @@
-import { normalizeURL } from "./crawl.js";
+import { consola } from "consola";
 
-console.log(normalizeURL("https://blog.boot.dev/path/"));
+function main() {
+  consola.box("web_crawler");
+
+  const args = process.argv.slice(2);
+
+  if (args.length !== 1) {
+    consola.error(new Error("one url required"));
+    process.exit(1);
+  }
+
+  const [baseUrl] = args;
+  consola.start(`crawling ${baseUrl}`);
+}
+
+main();
