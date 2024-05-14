@@ -1,5 +1,6 @@
 import { consola } from "consola";
 import { crawlPage } from "./crawl.js";
+import { generateReport } from "./report.js";
 
 async function main() {
   consola.box("web_crawler");
@@ -15,7 +16,7 @@ async function main() {
   consola.start(`crawling ${baseUrl}`);
 
   const pages = await crawlPage(baseUrl, baseUrl);
-  console.log(pages);
+  console.log(generateReport(pages));
 }
 
 main();
