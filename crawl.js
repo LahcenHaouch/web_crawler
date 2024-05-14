@@ -21,16 +21,21 @@ export function getURLsFromHTML(html, baseURL) {
   return Array.from(links).map((link) => {
     let url = link.getAttribute("href");
 
-    if (url.startsWith("/")) {
-      return baseURL + url;
+    if (URL.canParse(url)) {
+      return url;
+    } else {
+      return new URL(url, baseURL).toString();
     }
-    return url;
   });
 }
 
-export async function crawlPage(baseUrl) {
+function inSameDomain(firstUrl, secondUrl) {
+  return new URL(firstUrl).origin === new URL(secondUrl).origin;
+}
+
+export async function fetchHTML(url) {
   try {
-    const response = await fetch(baseUrl);
+    const response = await fetch(url);
 
     if (response.status >= 400) {
       consola.error(new Error(`status: ${response.status}`));
@@ -39,12 +44,36 @@ export async function crawlPage(baseUrl) {
 
     const contentHeader = response.headers.get("Content-Type");
     if (!contentHeader.startsWith("text/html")) {
-      consola.error(new Error(`invalid Content-Type: ${contentHeader}`));
       return;
     }
-    const html = await response.text();
-    console.log(html);
+    return response.text();
   } catch (error) {
-    consola.error(new Error(error));
+    throw new Error(error);
+  }
+}
+
+export async function crawlPage(baseUrl, currentUrl, pages = {}) {
+  if (!inSameDomain(baseUrl, currentUrl)) {
+    return pages;
+  }
+
+  const newCurrentUrl = normalizeURL(currentUrl);
+
+  if (pages[newCurrentUrl]) {
+    pages[newCurrentUrl]++;
+    return pages;
+  } else {
+    pages[newCurrentUrl] = 1;
+  }
+  try {
+    const html = await fetchHTML(currentUrl);
+    const urls = getURLsFromHTML(html, currentUrl);
+
+    urls.forEach((url) => crawlPage(baseUrl, url, pages));
+
+    return pages;
+  } catch (error) {
+    consola.error(new Error(error.message));
+    return pages;
   }
 }

@@ -1,7 +1,7 @@
 import { consola } from "consola";
 import { crawlPage } from "./crawl.js";
 
-function main() {
+async function main() {
   consola.box("web_crawler");
 
   const args = process.argv.slice(2);
@@ -13,7 +13,9 @@ function main() {
 
   const [baseUrl] = args;
   consola.start(`crawling ${baseUrl}`);
-  crawlPage(baseUrl);
+
+  const pages = await crawlPage(baseUrl, baseUrl);
+  console.log(pages);
 }
 
 main();
